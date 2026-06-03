@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLFLIX Masterclass: Joey Doesn't Share</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cafe: {
+                            bg: '#1c140d',        /* Very dark espresso */
+                            panel: '#2e1f14',     /* Dark mocha */
+                            orange: '#ea580c',    /* Warm orange */
+                            yellow: '#f59e0b',    /* Warm yellow */
+                            text: '#fef3c7',      /* Light cream text */
+                            muted: '#b45309'      /* Muted orange/brown */
+                        }
+                    },
+                    fontFamily: {
+                        friends: ['"Caveat Brush"', 'cursive'],
+                        base: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* --- DYNAMIC THEME ENGINE --- */
+        :root {
+            /* Theme 1: Central Perk (Cozy, Dark Brown/Orange) */
+            --bg-main: #1c140d;
+            --panel-bg: #2e1f14;
+            --text-main: #fef3c7;
+            --text-muted: #d97706;
+            --accent: #ea580c;
+            --accent-glow: rgba(234, 88, 12, 0.4);
+            --border-color: #78350f;
+            --shadow-color: rgba(0, 0, 0, 0.6);
+            --font-head: '"Caveat Brush"', cursive;
+        }
+
+        body.theme-joey {
+            /* Theme 2: Food Alert (Dark Red/Mustard - Photophobia Safe) */
+            --bg-main: #2a0a0a; 
+            --panel-bg: #3f0f0f;
+            --text-main: #fef08a;
+            --text-muted: #fca5a5;
+            --accent: #f59e0b; /* Mustard Yellow */
+            --accent-glow: rgba(245, 158, 11, 0.4);
+            --border-color: #991b1b;
+            --shadow-color: rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: var(--font-base);
+            transition: all 0.8s ease-in-out;
+            overflow: hidden;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Ambient Dots */
+        body::before {
+            content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+            background-image: radial-gradient(var(--accent-glow) 1px, transparent 1px);
+            background-size: 30px 30px; opacity: 0.2;
+        }
+
+        h1, h2, h3, .font-head { font-family: var(--font-head); font-weight: normal; letter-spacing: 1px; }
+
+        /* --- COMPONENTS --- */
+        .cafe-panel {
+            background-color: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border-radius: 12px;
+            position: relative; z-index: 10;
+            transition: all 0.5s ease;
+        }
+
+        .cafe-btn {
+            background-color: var(--accent); color: #1c140d;
+            border: 2px solid var(--accent);
+            box-shadow: 0 6px 0 var(--border-color), 0 10px 20px var(--shadow-color);
+            font-family: var(--font-head); font-size: 1.5rem; letter-spacing: 2px;
+            padding: 12px 32px; border-radius: 8px; cursor: pointer;
+            transition: all 0.1s;
+        }
+        .cafe-btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 var(--border-color), 0 8px 15px var(--shadow-color); }
+        .cafe-btn:active { transform: translateY(6px); box-shadow: 0 0 0 var(--border-color); }
+
+        .outline-btn {
+            background-color: transparent; border: 2px solid var(--border-color);
+            color: var(--text-main); font-weight: bold; padding: 8px 20px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+        }
+        .outline-btn:hover { background-color: var(--accent); color: #1c140d; border-color: var(--accent); }
+
+        /* --- LAYOUT & SLIDES --- */
+        main { flex: 1; position: relative; width: 100%; overflow: hidden; }
+        
+        .slide {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: none; opacity: 0; padding: 1.5rem; overflow-y: auto; overflow-x: hidden; z-index: 10;
+        }
+        .slide.active {
+            display: flex; flex-direction: column; align-items: center;
+            opacity: 1; animation: fadeIn 0.6s ease forwards;
+        }
+        .slide.active::before, .slide.active::after { content: ''; margin: auto; }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-content {
+            width: 100%; max-width: 950px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; flex-shrink: 0; padding: 2rem 0;
+        }
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        .interactive-card { cursor: pointer; transition: all 0.3s; border-left: 6px solid var(--accent); }
+        .interactive-card:hover { transform: translateY(-4px); border-color: var(--text-main); }
+        
+        .reveal-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease; }
+        .interactive-card.open .reveal-content { max-height: 400px; opacity: 1; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+
+        .follow-up-box {
+            background-color: rgba(0,0,0,0.2); border-left: 4px solid var(--text-muted);
+            padding: 1rem; border-radius: 0 8px 8px 0; margin-top: 1rem; text-align: left;
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+        .error-shake { animation: shakeError 0.4s ease; }
+
+        /* --- NEW MECHANIC: Interruption Simulator --- */
+        .interruption-box {
+            position: relative; overflow: hidden; background: #000; border: 4px solid var(--border-color); border-radius: 12px; height: 150px; display: flex; align-items: center; justify-content: center; width: 100%; max-width: 600px; margin: 0 auto;
+        }
+        .continuous-action { font-size: 1.5rem; font-weight: bold; color: var(--text-main); animation: pulseText 2s infinite; }
+        .interrupt-object { position: absolute; top: -100px; left: 50%; transform: translateX(-50%); font-size: 4rem; opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .interrupted .continuous-action { opacity: 0.3; text-decoration: line-through; animation: none; }
+        .interrupted .interrupt-object { top: 50%; transform: translate(-50%, -50%); opacity: 1; filter: drop-shadow(0 0 20px var(--accent)); }
+        
+        @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* --- MODALS & EFFECTS --- */
+        #dict-modal { position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .clickable-word { color: var(--accent); border-bottom: 2px dashed var(--accent); cursor: pointer; font-weight: 800; transition: all 0.2s; padding: 0 4px; }
+        .clickable-word:hover { background-color: var(--accent); color: #1c140d; border-bottom-style: solid; border-radius: 4px; }
+
+        /* Food Alert Flash */
+        #alert-overlay {
+            position: fixed; inset: 0; z-index: 9999; background: #ef4444; display: none; pointer-events: none; mix-blend-mode: multiply;
+        }
+        .alert-active { display: block !important; animation: sirenFlash 2s forwards; }
+        @keyframes sirenFlash { 
+            0%, 50%, 100% { opacity: 0; } 
+            25%, 75% { opacity: 0.4; } 
+        }
+
+        #praise-popup { position: fixed; top: 15%; left: 50%; transform: translate(-50%, 0) scale(0); opacity: 0; z-index: 10000; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #praise-popup.show { transform: translate(-50%, 0) scale(1); opacity: 1; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="alert-overlay"></div>
+    <div id="overlay-dark" class="fixed inset-0 bg-black/80 z-[60] hidden backdrop-blur-sm transition-opacity" onclick="closeNotepad()"></div>
+
+    <!-- PRAISE POPUP -->
+    <div id="praise-popup">
+        <div class="cafe-panel px-8 py-4 flex items-center gap-4 text-3xl font-head border-l-4 border-l-[var(--accent)]">
+            <span id="praise-text" class="text-[var(--text-main)] font-bold tracking-widest uppercase"></span>
+        </div>
+    </div>
+
+    <!-- DICTIONARY MODAL -->
+    <div id="dict-modal">
+        <div class="cafe-panel p-10 max-w-lg w-full m-4 relative border-t-4 border-t-[var(--accent)]">
+            <button onclick="closeDict()" class="absolute top-4 right-4 text-gray-500 hover:text-white font-black text-2xl">✕</button>
+            <h3 id="dict-word" class="font-head text-5xl mb-2 text-[var(--accent)] uppercase tracking-widest">Word</h3>
+            <p id="dict-def" class="text-xl font-bold text-gray-200 mb-6 pb-6 border-b border-[var(--border-color)]">Definition</p>
+            <div class="follow-up-box !mt-0 !border-l-[var(--accent)]">
+                <p class="font-bold text-[var(--accent)] text-xs uppercase tracking-widest mb-2 font-head">🗣️ Follow-up:</p>
+                <p id="dict-prompt" class="font-medium text-white text-base">Prompt text</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 shrink-0 relative z-50 bg-[var(--panel-bg)] border-b border-[var(--border-color)] shadow-md transition-colors">
+        <div class="flex items-center gap-3 md:gap-4">
+            <span class="text-3xl drop-shadow-md" id="header-icon">☕</span>
+            <h1 class="font-head text-2xl md:text-3xl text-[var(--accent)] tracking-widest hidden md:block" id="header-title">Central Perk</h1>
+            <span class="bg-[var(--bg-main)] border border-[var(--accent)] text-[var(--accent)] font-bold text-[10px] md:text-xs px-2 py-1 rounded tracking-widest uppercase">A2 LEVEL</span>
+        </div>
+        
+        <div class="flex items-center gap-3 md:gap-4">
+            <div class="flex items-center gap-2 border border-[var(--border-color)] rounded px-3 py-1 hidden lg:flex bg-black/20">
+                <span class="text-[10px] text-[var(--text-muted)] font-bold mr-2 uppercase tracking-widest">Praise:</span>
+                <button onclick="triggerPraise('DELICIOUS!', '🍔')" class="text-xl hover:scale-125 transition-transform" title="Delicious">🍔</button>
+                <button onclick="triggerPraise('GOOD POINT!', '☕')" class="text-xl hover:scale-125 transition-transform" title="Good Point">☕</button>
+                <button onclick="triggerPraise('JOEY APPROVED!', '😎')" class="text-xl hover:scale-125 transition-transform" title="Joey Approved">😎</button>
+            </div>
+            <button onclick="toggleFullscreen()" class="outline-btn text-[10px] uppercase tracking-widest hidden sm:block">Fullscreen</button>
+            <button onclick="toggleNotepad()" class="cafe-btn !text-sm !py-2 !px-4 !shadow-none hover:!shadow-md">Menu Notes</button>
+        </div>
+    </header>
+
+    <!-- MAIN APP AREA -->
+    <main id="main-area">
+        
+        <!-- PAGE 1: COVER -->
+        <section class="slide active">
+            <div class="page-content">
+                <div class="w-full max-w-[220px] md:max-w-[320px] cafe-panel p-2 mb-8 mx-auto bg-black rotate-[-2deg] hover:rotate-0 transition-transform">
+                    <img src="https://m.media-amazon.com/images/I/81EK4l7881L._AC_UF894,1000_QL80_.jpg" alt="Friends Cover" class="w-full h-auto object-cover rounded opacity-90">
+                </div>
+                <span class="text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase text-[var(--accent)] mb-2 font-base bg-black/30 px-3 py-1 rounded">WOLFLIX Masterclass</span>
+                <h1 class="font-head text-6xl md:text-8xl mb-2 text-white tracking-widest drop-shadow-md">F R I E N D S</h1>
+                <h2 class="text-2xl md:text-3xl font-bold text-[var(--accent)] mb-8 font-head tracking-wider">The Food Rule</h2>
+                
+                <div class="cafe-panel p-6 max-w-2xl border-l-4 border-[var(--accent)] bg-black/20 mx-auto">
+                    <p class="text-lg italic font-medium text-gray-300">"It's not about the fries... It's about what the fries represent!"</p>
+                </div>
+                
+                <button onclick="nextSlide()" class="cafe-btn mt-10 px-12">Take a Seat</button>
+            </div>
+        </section>
+
+        <!-- PAGE 2: Briefing -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Teacher's Guide</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-8 text-[var(--accent)] tracking-wide">Menu for Today</h1>
+                
+                <div class="cafe-panel p-8 md:p-12 text-left mx-auto max-w-4xl w-full border-t-4 border-t-[var(--accent)]">
+                    <p class="mb-4 font-bold text-xl md:text-2xl text-[var(--text-main)] border-b border-[var(--border-color)] pb-4">A2 (Pre-Intermediate) Masterclass</p>
+                    <p class="mb-8 text-[var(--text-main)] opacity-90 text-base md:text-lg font-medium">In this lesson, we will talk about dating, food etiquette, and what happens when someone breaks your rules.</p>
+                    
+                    <div class="bg-black/30 p-6 rounded border border-[var(--border-color)]">
+                        <h3 class="font-head uppercase text-2xl mb-4 text-[var(--accent)] tracking-widest">Grammar Target:</h3>
+                        <ul class="space-y-4 font-bold text-base md:text-lg text-[var(--text-main)]">
+                            <li class="flex items-center gap-3"><span class="text-2xl">⏳</span> <strong>Past Continuous:</strong> Actions in progress in the past ("I was eating").</li>
+                            <li class="flex items-center gap-3"><span class="text-2xl">💥</span> <strong>The Interruption:</strong> Past Continuous + Past Simple ("I was eating when she took my food").</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 3: Warm Up 1 -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Warm Up</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-10 text-[var(--accent)] tracking-wide">Sharing is Caring?</h1>
+                
+                <div class="cafe-panel p-10 md:p-14 text-center max-w-4xl mx-auto w-full">
+                    <span class="text-7xl mb-8 block drop-shadow-md">🍕</span>
+                    <p class="text-xl md:text-3xl font-bold mb-8 text-[var(--text-main)] leading-relaxed">
+                        "If you order a delicious meal at a restaurant, do you like to share it with your friends, or do you prefer to eat it all by yourself?"
+                    </p>
+                    <div class="follow-up-box mx-auto max-w-2xl bg-black/40">
+                        <p class="font-bold text-[var(--accent)] text-[10px] mb-1 tracking-widest uppercase font-base">🗣️ Discussion Prompt:</p>
+                        <p class="font-medium text-base text-[var(--text-main)]">Is it okay for someone to take a french fry from your plate without asking?</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 4: Warm Up 2 -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Warm Up</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-10 text-[var(--accent)] tracking-wide">Pet Peeves</h1>
+                
+                <div class="cafe-panel p-10 md:p-14 text-center max-w-4xl mx-auto w-full border-t-4 border-t-[var(--accent)]">
+                    <span class="text-7xl mb-8 block drop-shadow-md">😠</span>
+                    <p class="text-xl md:text-3xl font-bold mb-8 text-[var(--text-main)] leading-relaxed">
+                        "A 'Pet Peeve' is a small thing that annoys you a lot. What is your biggest pet peeve when eating out with other people?"
+                    </p>
+                    <div class="follow-up-box mx-auto max-w-2xl bg-black/40">
+                        <p class="font-bold text-[var(--accent)] text-[10px] mb-1 tracking-widest uppercase font-base">🗣️ Examples:</p>
+                        <ul class="text-left font-medium text-base text-[var(--text-main)] list-disc pl-6 space-y-2">
+                            <li>People chewing loudly.</li>
+                            <li>Looking at the phone during the meal.</li>
+                            <li>Complaining about the price.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 5: The Character -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Profile</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-10 text-[var(--accent)] tracking-wide">Joey Tribbiani</h1>
+                
+                <div class="cafe-panel p-8 md:p-10 w-full max-w-4xl flex flex-col md:flex-row gap-8 items-center border-l-8 border-[var(--accent)]">
+                    <div class="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-[var(--border-color)] shrink-0">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/d/da/Matt_LeBlanc_as_Joey_Tribbiani.jpg" alt="Joey" class="w-full h-full object-cover">
+                    </div>
+                    <div class="text-left">
+                        <h2 class="text-3xl font-black font-head mb-2 text-[var(--accent)] tracking-widest">Food > Everything</h2>
+                        <p class="text-base md:text-lg leading-relaxed mb-4 text-gray-300 font-medium">
+                            Joey is a loyal friend and loves dating women. But he has one absolute, unbreakable rule in his life: <strong>He loves his food more than anything else.</strong>
+                        </p>
+                        <p class="text-base italic text-gray-400 bg-black/30 p-3 rounded">
+                            "If you mess with his food, the date is over."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 6: Lexicon 1 (Coffee Order) -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Vocabulary</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-4 text-[var(--accent)] tracking-wide">The Date</h1>
+                <p class="text-base text-gray-400 font-bold mb-8 max-w-2xl mx-auto">Read the definition on the order ticket. Click the correct coffee cup to serve the word to the customer!</p>
+
+                <div class="cafe-panel p-8 text-center max-w-4xl mx-auto w-full border-t-4 border-t-[var(--accent)] bg-black/20">
+                    
+                    <!-- Order Ticket -->
+                    <div class="mb-10 p-6 bg-yellow-900/30 text-white border-2 border-[var(--accent)] rounded-lg shadow-inner max-w-lg mx-auto transform -rotate-1 relative transition-all" id="ticket-box-1">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[var(--accent)] text-black text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-md">Order Ticket</div>
+                        <p id="ticket-def-1" class="text-xl md:text-2xl font-bold font-base tracking-wide text-yellow-100">A romantic meeting between two people.</p>
+                    </div>
+
+                    <!-- Coffee Cups -->
+                    <div class="flex justify-center gap-6 md:gap-10 flex-wrap w-full">
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(1, 'A DATE', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-xl md:text-2xl font-black text-white tracking-widest -rotate-6">A DATE</span>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(1, 'TO SHARE', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-lg md:text-xl font-black text-white tracking-widest -rotate-6">TO SHARE</span>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(1, 'A PLATE', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-xl md:text-2xl font-black text-white tracking-widest -rotate-6">A PLATE</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="dynamic-followup-1" class="hidden w-full max-w-4xl mx-auto mt-8 transition-all duration-500">
+                    <div class="follow-up-box !border-l-green-500 bg-green-900/20 p-6 rounded-lg text-left shadow-lg">
+                        <p class="font-bold text-green-500 text-sm uppercase tracking-widest mb-2 font-base">🗣️ Discussion Prompt:</p>
+                        <p id="dynamic-prompt-text-1" class="text-xl text-white font-medium"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 7: Lexicon 2 (Coffee Order) -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Vocabulary</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-4 text-[var(--accent)] tracking-wide">The Crime</h1>
+                <p class="text-base text-gray-400 font-bold mb-8 max-w-2xl mx-auto">Serve the right words to clear the order queue!</p>
+
+                <div class="cafe-panel p-8 text-center max-w-4xl mx-auto w-full border-t-4 border-t-[var(--accent)] bg-black/20">
+                    
+                    <!-- Order Ticket -->
+                    <div class="mb-10 p-6 bg-yellow-900/30 text-white border-2 border-[var(--accent)] rounded-lg shadow-inner max-w-lg mx-auto transform -rotate-1 relative transition-all" id="ticket-box-2">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[var(--accent)] text-black text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-md">Order Ticket</div>
+                        <p id="ticket-def-2" class="text-xl md:text-2xl font-bold font-base tracking-wide text-yellow-100">Fried potatoes (Chips in the UK).</p>
+                    </div>
+
+                    <!-- Coffee Cups -->
+                    <div class="flex justify-center gap-6 md:gap-10 flex-wrap w-full">
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(2, 'FRIES', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-xl md:text-3xl font-black text-white tracking-widest -rotate-6">FRIES</span>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(2, 'TO REACH', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-lg md:text-xl font-black text-white tracking-widest -rotate-6">TO REACH</span>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(2, 'DEALBREAKER', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-[10px] md:text-sm font-black text-white tracking-widest -rotate-6">DEALBREAKER</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="dynamic-followup-2" class="hidden w-full max-w-4xl mx-auto mt-8 transition-all duration-500">
+                    <div class="follow-up-box !border-l-green-500 bg-green-900/20 p-6 rounded-lg text-left shadow-lg">
+                        <p class="font-bold text-green-500 text-sm uppercase tracking-widest mb-2 font-base">🗣️ Discussion Prompt:</p>
+                        <p id="dynamic-prompt-text-2" class="text-xl text-white font-medium"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 7: Lexicon 2 (Coffee Order) -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Vocabulary</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-4 text-[var(--accent)] tracking-wide">The Crime</h1>
+                <p class="text-base text-gray-400 font-bold mb-8 max-w-2xl mx-auto">Serve the right words to clear the order queue!</p>
+
+                <div class="cafe-panel p-8 text-center max-w-4xl mx-auto w-full border-t-4 border-t-[var(--accent)] bg-black/20">
+                    
+                    <!-- Order Ticket -->
+                    <div class="mb-10 p-6 bg-yellow-900/30 text-white border-2 border-[var(--accent)] rounded-lg shadow-inner max-w-lg mx-auto transform -rotate-1 relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[var(--accent)] text-black text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-md">Order Ticket</div>
+                        <p id="ticket-def-2" class="text-xl md:text-2xl font-bold font-base tracking-wide text-yellow-100">Fried potatoes (Chips in the UK).</p>
+                    </div>
+
+                    <!-- Coffee Cups -->
+                    <div class="flex justify-center gap-6 md:gap-10 flex-wrap w-full">
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(2, 'FRIES', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-xl md:text-3xl font-black text-white tracking-widest -rotate-6">FRIES</span>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(2, 'TO REACH', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-lg md:text-xl font-black text-white tracking-widest -rotate-6">TO REACH</span>
+                                </div>
+                            </div>
+                        </button>
+                        <button class="group relative transition-all hover:-translate-y-4 duration-300 outline-none" onclick="checkCup(2, 'DEALBREAKER', this)">
+                            <div class="cup-body w-24 h-32 md:w-32 md:h-40 bg-[#eaddcf] rounded-b-[2rem] border-4 border-[#8b5a2b] relative flex items-center justify-center overflow-hidden transition-colors shadow-xl">
+                                <div class="absolute top-0 w-full h-6 bg-white border-b-4 border-[#8b5a2b]"></div>
+                                <div class="absolute top-1/2 left-0 w-full h-14 bg-[#8b5a2b] transform -translate-y-1/2 flex items-center justify-center shadow-md">
+                                    <span class="font-head text-[10px] md:text-sm font-black text-white tracking-widest -rotate-6">DEALBREAKER</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="lex-success-2" class="hidden w-full max-w-4xl mx-auto mt-8">
+                    <div class="follow-up-box !border-l-green-500 bg-green-900/20 p-6 rounded-lg">
+                        <p class="font-bold text-green-500 text-sm uppercase tracking-widest mb-2 font-base">🗣️ Discussion Prompt:</p>
+                        <p class="text-xl text-white font-medium">What is a Dealbreaker for you in a friendship? (e.g. Lying, being late...)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 8: Grammar 1 -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Grammar Focus</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-8 text-[var(--accent)] tracking-wide">Past Continuous</h1>
+                
+                <div class="cafe-panel p-8 md:p-12 text-left max-w-4xl w-full mx-auto border-t-4 border-t-[var(--accent)]">
+                    <p class="text-lg md:text-xl font-bold mb-6">We use the Past Continuous to talk about actions that were <strong class="text-[var(--accent)]">in progress</strong> at a specific time in the past. It sets the scene.</p>
+                    
+                    <div class="bg-black/40 p-6 rounded border border-[var(--border-color)] text-center mb-6">
+                        <p class="text-2xl font-black text-gray-300 font-head tracking-widest">[ WAS / WERE ] + [ VERB-ING ]</p>
+                    </div>
+
+                    <ul class="space-y-4 font-medium text-lg text-gray-300">
+                        <li>🍟 "Joey <strong class="text-[var(--accent)]">was eating</strong> his food."</li>
+                        <li>🍷 "They <strong class="text-[var(--accent)]">were drinking</strong> wine at the restaurant."</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 9: Grammar 2 (Interruption) -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Grammar Focus</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-8 text-[var(--accent)] tracking-wide">The Interruption</h1>
+                
+                <div class="cafe-panel p-8 md:p-12 text-left max-w-4xl w-full mx-auto border-l-4 border-l-red-500">
+                    <p class="text-lg md:text-xl font-bold mb-6">What happens when a long action is stopped by a sudden action? We use <strong class="text-red-500">WHEN + Past Simple</strong>.</p>
+                    
+                    <div class="bg-black/40 p-6 rounded border border-[var(--border-color)] space-y-4">
+                        <p class="text-lg"><span class="bg-[var(--accent)] text-black px-2 font-bold rounded mr-2">Long Action:</span> "I was eating my burger..." <span class="text-gray-500 text-sm">(Past Continuous)</span></p>
+                        <p class="text-lg font-black text-red-500 uppercase tracking-widest">WHEN</p>
+                        <p class="text-lg"><span class="bg-red-500 text-black px-2 font-bold rounded mr-2">Sudden Action:</span> "...she <strong class="text-red-400">took</strong> my fries." <span class="text-gray-500 text-sm">(Past Simple)</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 10: The Formula -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Syntax</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-8 text-[var(--accent)] tracking-wide">The Formula</h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl mx-auto text-left">
+                    <div class="cafe-panel p-8 border-t-4 border-t-[var(--accent)]">
+                        <h3 class="text-2xl font-black mb-4 text-[var(--accent)] font-head tracking-widest">1. The Background</h3>
+                        <p class="font-bold text-gray-400 mb-2">Sets the scene (Past Continuous).</p>
+                        <p class="text-xl text-white">"We <span class="text-[var(--accent)] underline">were talking</span> and laughing..."</p>
+                    </div>
+                    <div class="cafe-panel p-8 border-t-4 border-t-red-500">
+                        <h3 class="text-2xl font-black mb-4 text-red-500 font-head tracking-widest">2. The Problem</h3>
+                        <p class="font-bold text-gray-400 mb-2">The sudden event (Past Simple).</p>
+                        <p class="text-xl text-white">"...when she suddenly <span class="text-red-400 underline">reached</span> for my plate."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 11: MECHANIC (Interruption Simulator) -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Interactive Challenge</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-8 text-[var(--accent)] tracking-wide">The Simulator</h1>
+                <p class="text-base font-bold text-gray-400 mb-8 max-w-2xl mx-auto">Click the button to interrupt the continuous action!</p>
+
+                <div class="interruption-box" id="sim-box">
+                    <div class="continuous-action">"Joey was enjoying his date..."</div>
+                    <div class="interrupt-object">🍟</div>
+                </div>
+
+                <button class="cafe-btn mt-8" onclick="triggerInterruption()">[ DROP FRIES ]</button>
+                
+                <p id="sim-feedback" class="mt-6 text-xl font-bold text-red-500 opacity-0 transition-opacity font-head tracking-widest">"...when she took his fries!" (PAST SIMPLE)</p>
+            </div>
+        </section>
+
+        <!-- PAGE 12: Describe the Crime -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--text-muted)] font-base">Speaking Module</h2>
+                <h1 class="font-head text-5xl md:text-7xl mb-8 text-[var(--accent)] tracking-wide">Describe the Crime</h1>
+                
+                <div class="cafe-panel p-10 max-w-3xl mx-auto w-full text-center">
+                    <p class="text-xl font-bold mb-8 text-white leading-relaxed">
+                        Connect the two actions using <strong class="text-red-500">WHEN</strong>.
+                    </p>
+                    
+                    <div class="bg-black/30 p-6 border border-[var(--border-color)] rounded text-left space-y-4">
+                        <div class="border-b border-gray-700 pb-4">
+                            <p class="text-gray-400 font-bold mb-1">Action 1 (Continuous): <span class="text-white font-normal">I / drink / my coffee</span></p>
+                            <p class="text-gray-400 font-bold mb-1">Action 2 (Sudden): <span class="text-white font-normal">You / arrive</span></p>
+                            <p class="text-[var(--accent)] font-head text-2xl tracking-widest mt-2">> I was drinking my coffee when you arrived.</p>
+                        </div>
+                        <div class="pt-2">
+                            <p class="text-gray-400 font-bold mb-1">Action 1 (Continuous): <span class="text-white font-normal">Joey / eat / a burger</span></p>
+                            <p class="text-gray-400 font-bold mb-1">Action 2 (Sudden): <span class="text-white font-normal">She / steal / a fry</span></p>
+                            <p class="text-gray-500 font-head text-2xl tracking-widest mt-2 italic">Your turn to speak...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- ACT III: THE INCIDENT (Transition)             -->
+        <!-- ============================================== -->
+
+        <!-- PAGE 13: THE SETUP -->
+        <section class="slide text-center">
+            <div class="page-content">
+                <div class="max-w-4xl mx-auto flex flex-col items-center justify-center w-full">
+                    <span class="text-7xl mb-8 block drop-shadow-md">🍽️</span>
+                    <h2 class="font-bold tracking-widest mb-4 uppercase text-sm text-[var(--accent)]">The Setup</h2>
+                    <h1 class="font-head text-5xl md:text-7xl mb-8 text-white tracking-widest">A Great Date</h1>
+                    <div class="cafe-panel p-8 max-w-3xl border-l-4 border-l-[var(--accent)] text-lg md:text-xl leading-relaxed font-bold text-gray-300">
+                        "Joey met Sarah. They went to a nice restaurant. Everything was going perfectly... until she made a terrible mistake."
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 14: WOW MECHANIC (FOOD ALERT) -->
+        <section class="slide">
+            <div class="page-content">
+                <div class="w-full max-w-3xl mx-auto flex flex-col items-center justify-center text-center h-full">
+                    <h2 class="font-bold tracking-widest mb-4 uppercase text-sm text-red-500 animate-pulse">WARNING</h2>
+                    <h1 class="font-head text-6xl md:text-8xl mb-10 text-white tracking-widest drop-shadow-md">Threat Detected</h1>
+                    
+                    <p class="text-xl md:text-2xl font-bold mb-12 text-gray-400">
+                        "Someone is reaching for the plate."
+                    </p>
+                    
+                    <button onclick="triggerFoodAlert()" class="cafe-btn px-10 py-6 text-2xl w-full max-w-md bg-red-600 border-red-800 text-white shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:bg-red-500" id="alert-btn">
+                        DEFEND THE FOOD
+                    </button>
+                    <p class="text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest mt-8">Student: Click to activate Joey's Mind.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- THEME CHANGES TO JOEY'S MIND (RED/MUSTARD) HERE -->
+
+        <!-- PAGE 15: TRAILER PREP -->
+        <section class="slide text-center">
+            <div class="page-content">
+                <div class="max-w-4xl mx-auto flex flex-col items-center w-full">
+                    <span class="text-7xl mb-6 block drop-shadow-md">🍟</span>
+                    <h2 class="font-bold tracking-widest mb-3 uppercase text-xs text-[var(--accent)]">Observation</h2>
+                    <h1 class="text-5xl md:text-7xl font-head uppercase mb-8 text-white tracking-widest">The Crime Scene</h1>
+                    
+                    <div class="cafe-panel p-8 md:p-10 max-w-3xl border-t-4 border-t-[var(--accent)] text-lg leading-relaxed text-left w-full">
+                        <p class="mb-6 font-bold border-b border-[var(--border-color)] pb-4 text-white">
+                            Watch the scene. Listen to how Joey justifies his actions.
+                        </p>
+                        <div class="bg-black/40 p-6 rounded border border-[var(--border-color)]">
+                            <p class="font-bold text-xs text-gray-400 uppercase tracking-widest mb-3">> Video Focus:</p>
+                            <ul class="list-disc pl-6 space-y-2 font-bold text-gray-200">
+                                <li>What was Joey eating when it happened?</li>
+                                <li>Does Phoebe agree with Joey's rule?</li>
+                                <li>How does the date end?</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 16: THE VIDEO -->
+        <section class="slide h-full">
+            <div class="page-content h-full w-full max-w-5xl mx-auto">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-sm text-[var(--accent)] text-center drop-shadow-md">Video Evidence</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-8 text-center text-white tracking-widest">Joey Doesn't Share</h1>
+                
+                <div class="w-full aspect-video rounded-xl overflow-hidden border-4 border-[var(--border-color)] bg-black shadow-2xl relative shrink-0">
+                    <iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/hmL6Z9rX8MU?rel=0" frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- ACT IV: POST-VIDEO ANALYSIS                    -->
+        <!-- ============================================== -->
+
+        <!-- PAGE 17: COMPREHENSION CHECK -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)] text-center">Data Analysis</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-10 text-center text-white tracking-widest">Comprehension</h1>
+                
+                <div class="space-y-6 max-w-4xl mx-auto w-full">
+                    <div class="cafe-panel p-8 interactive-card text-left" onclick="this.classList.toggle('open')">
+                        <p class="font-bold text-xl text-white">Q: What did Sarah (the date) do wrong?</p>
+                        <div class="reveal-content text-[var(--accent)] font-bold text-lg mt-4 border-t border-[var(--border-color)] pt-4 font-head tracking-wider uppercase">
+                            > She took some of Joey's fries from his plate.
+                        </div>
+                    </div>
+                    <div class="cafe-panel p-8 interactive-card text-left border-l-red-500" onclick="this.classList.toggle('open')">
+                        <p class="font-bold text-xl text-white">Q: Why didn't Joey order fries for her?</p>
+                        <div class="reveal-content text-red-400 font-bold text-lg mt-4 border-t border-[var(--border-color)] pt-4 font-head tracking-wider uppercase">
+                            > He asked if she wanted fries, but she said she wanted a salad.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 18: SCRIPT DECRYPTION (Clickable) -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)] text-center">Script Analysis</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-6 text-center text-white tracking-widest">The Excuse</h1>
+                <p class="text-xs text-gray-400 font-bold mb-8 uppercase tracking-widest">Click highlighted words for definitions.</p>
+
+                <div class="cafe-panel p-8 md:p-12 max-w-4xl mx-auto w-full text-left font-medium text-lg md:text-xl leading-loose text-gray-200">
+                    "We were having a great time... and then I <span class="clickable-word" onclick="showDef('Turned around', 'To move your body to face the opposite direction.', 'Have you ever turned around and seen someone staring at you?')">turned around</span> for a second, and she <span class="clickable-word" onclick="showDef('Reached', 'To stretch your arm to touch or take something.', 'Is it rude to reach across the table for salt?')">reached</span> for my fries! I was <span class="clickable-word" onclick="showDef('Not even looking', 'To have your eyes focused somewhere else.', 'Have you ever dropped something because you were not even looking?')">not even looking</span>! It's not about the fries... Joey doesn't <span class="clickable-word" onclick="showDef('Share', 'To give a portion of what you have to others.', 'What is one thing you NEVER share with anyone?')">share</span> food!"
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 19: GRAMMAR APPLIED -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)] text-center">Interactive Challenge</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-8 text-center text-white tracking-widest">Fill the Blanks</h1>
+                <p class="text-center text-lg font-bold mb-10 text-gray-400 max-w-2xl mx-auto">Complete the sentences about the video using the Past Continuous. Click to reveal.</p>
+
+                <div class="space-y-4 max-w-3xl mx-auto w-full text-lg font-bold">
+                    <div class="cafe-panel p-6 interactive-card text-left" onclick="this.classList.toggle('open')">
+                        <div class="flex items-center gap-4">
+                            <span class="text-3xl opacity-80">🍷</span>
+                            <p class="text-white">"They <span class="border-b-2 border-gray-600 px-4 text-transparent mx-1">___</span> (have) a great time when she took the fries."</p>
+                        </div>
+                        <div class="reveal-content mt-0 font-head text-2xl text-[var(--accent)] border-none pt-0">> WERE HAVING</div>
+                    </div>
+                    <div class="cafe-panel p-6 interactive-card text-left" onclick="this.classList.toggle('open')">
+                        <div class="flex items-center gap-4">
+                            <span class="text-3xl opacity-80">👀</span>
+                            <p class="text-white">"I <span class="border-b-2 border-gray-600 px-4 text-transparent mx-1">___</span> (not look) when she reached for my plate."</p>
+                        </div>
+                        <div class="reveal-content mt-0 font-head text-2xl text-[var(--accent)] border-none pt-0">> WAS NOT LOOKING</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 20: DEEP DISCUSSION -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)] text-center">Philosophy</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-10 text-center text-white tracking-widest">Is Joey Right?</h1>
+                
+                <div class="cafe-panel p-8 md:p-12 max-w-4xl mx-auto w-full text-center shadow-xl border-t-4 border-t-red-500">
+                    <span class="text-6xl mb-6 block drop-shadow-md">🥗 🍟</span>
+                    <p class="text-xl md:text-2xl font-bold leading-relaxed mb-8 text-white">
+                        "Sarah ordered a salad because she 'wasn't hungry', but then she ate Joey's fries. Is this acceptable behavior on a date?"
+                    </p>
+                    
+                    <div class="bg-black/30 p-6 rounded text-left border border-[var(--border-color)]">
+                        <p class="font-bold text-[var(--accent)] text-[10px] mb-2 tracking-widest uppercase">🗣️ Prompt:</p>
+                        <p class="italic text-lg text-gray-300 font-medium">"I think Joey is [ right / wrong ] because..."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- ACT V: THE DEALBREAKERS (Output)               -->
+        <!-- ============================================== -->
+
+        <!-- PAGE 21: INTERACTIVE SPEAKING (RULES) -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)] text-center">Interactive Speaking</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-10 text-center text-white tracking-widest">The Restaurant Rules</h1>
+                
+                <div class="cafe-panel p-10 max-w-4xl mx-auto w-full text-center border-l-4 border-l-[var(--accent)]">
+                    <p class="text-xl font-bold mb-8 text-white">
+                        Everyone has rules for sharing food. What is your #1 rule at a restaurant?
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                        <div class="bg-black/40 p-6 border border-[var(--border-color)] rounded">
+                            <p class="text-[var(--accent)] font-bold uppercase text-[10px] tracking-widest mb-2">Rule 1:</p>
+                            <p class="text-lg font-medium text-gray-300">"Always ask before taking something from my plate."</p>
+                        </div>
+                        <div class="bg-black/40 p-6 border border-[var(--border-color)] rounded">
+                            <p class="text-[var(--accent)] font-bold uppercase text-[10px] tracking-widest mb-2">Rule 2:</p>
+                            <p class="text-lg font-medium text-gray-300">"If you want fries, order your own fries!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 22: THE DEALBREAKER GAME -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-red-500 text-center">Debate Mechanic</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-10 text-center text-white tracking-widest">Dealbreaker?</h1>
+                
+                <div class="cafe-panel p-10 max-w-4xl mx-auto w-full text-center">
+                    <p class="text-xl font-bold leading-relaxed mb-10 text-white">
+                        Are these actions acceptable or a Dealbreaker (fim de relacionamento/amizade)?
+                    </p>
+                    
+                    <div class="space-y-6 text-left max-w-2xl mx-auto">
+                        <div class="bg-black/30 p-4 border border-[var(--border-color)] flex items-center justify-between gap-4">
+                            <p class="font-bold text-gray-300">Chewing with mouth open.</p>
+                            <button class="outline-btn text-sm whitespace-nowrap" onclick="this.innerText='DEALBREAKER'; this.style.backgroundColor='#ef4444'; this.style.color='#000'">Vote</button>
+                        </div>
+                        <div class="bg-black/30 p-4 border border-[var(--border-color)] flex items-center justify-between gap-4">
+                            <p class="font-bold text-gray-300">Being rude to the waiter.</p>
+                            <button class="outline-btn text-sm whitespace-nowrap" onclick="this.innerText='DEALBREAKER'; this.style.backgroundColor='#ef4444'; this.style.color='#000'">Vote</button>
+                        </div>
+                        <div class="bg-black/30 p-4 border border-[var(--border-color)] flex items-center justify-between gap-4">
+                            <p class="font-bold text-gray-300">Looking at the phone during dinner.</p>
+                            <button class="outline-btn text-sm whitespace-nowrap" onclick="this.innerText='ACCEPTABLE'; this.style.backgroundColor='#10b981'; this.style.color='#000'">Vote</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 23: SPEAKING ROULETTE -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)] text-center">Fluency Test</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-10 text-center text-white tracking-widest">The Roulette</h1>
+                
+                <div class="cafe-panel p-12 max-w-3xl mx-auto w-full text-center border-4 border-[var(--accent)] shadow-[0_0_30px_var(--accent-glow)]">
+                    <div id="roulette-box" class="h-32 flex items-center justify-center bg-black/60 rounded-lg mb-8 border border-[var(--border-color)] p-4">
+                        <p id="roulette-text" class="text-2xl font-bold text-[var(--accent)] italic">Click SPIN to get a question.</p>
+                    </div>
+                    <button class="cafe-btn w-full max-w-xs" onclick="spinRoulette()">[ SPIN ]</button>
+                    <p class="text-sm font-bold text-gray-500 uppercase tracking-widest mt-6">Questions left: <span id="roulette-count">6</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 24: HOMEWORK -->
+        <section class="slide">
+            <div class="page-content">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)] text-center">Post-Class Assignment</h2>
+                <h1 class="text-4xl md:text-6xl font-head uppercase mb-8 text-center text-white tracking-widest">Your Own Rule</h1>
+                
+                <div class="cafe-panel p-10 max-w-3xl mx-auto w-full relative border-2 border-[var(--accent)] bg-black/50">
+                    <div class="absolute -top-4 -right-4 bg-[var(--accent)] text-black font-black uppercase tracking-widest px-6 py-2 text-sm shadow-lg transform rotate-6 font-head">HOMEWORK</div>
+                    <h3 class="text-2xl font-black mb-6 uppercase border-b border-[var(--border-color)] pb-4 tracking-widest text-white">Instructions:</h3>
+                    <p class="text-lg leading-relaxed font-bold mb-6 text-gray-300">
+                        "Write a short paragraph (50-80 words) describing a time someone broke your 'Dealbreaker' rule."
+                    </p>
+                    <ul class="list-disc pl-8 text-base font-medium space-y-4 mb-4 text-gray-400 text-left">
+                        <li>Use the <strong class="text-[var(--accent)]">Past Continuous</strong> to set the scene (I was working...).</li>
+                        <li>Use the <strong class="text-red-500">Past Simple</strong> to describe the interruption (when he took my pen).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 25: CONCLUSION -->
+        <section class="slide">
+            <div class="page-content items-center text-center">
+                <h2 class="font-bold tracking-widest mb-2 uppercase text-xs text-[var(--accent)]">Session Complete</h2>
+                <h1 class="text-5xl md:text-7xl font-head uppercase mb-10 text-white tracking-widest drop-shadow-md">Check, Please!</h1>
+                
+                <div class="cafe-panel p-8 text-center flex flex-col justify-center border border-[var(--border-color)] max-w-2xl mx-auto w-full mb-10 bg-black/40">
+                    <p class="mb-6 text-sm md:text-base font-bold text-gray-400 uppercase tracking-widest">Rate this lesson's hunger level:</p>
+                    <div class="flex justify-center gap-3 md:gap-6 mb-6">
+                        <button onclick="rate(1)" class="pizza-rating text-5xl md:text-6xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">🍕</button>
+                        <button onclick="rate(2)" class="pizza-rating text-5xl md:text-6xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">🍕</button>
+                        <button onclick="rate(3)" class="pizza-rating text-5xl md:text-6xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">🍕</button>
+                        <button onclick="rate(4)" class="pizza-rating text-5xl md:text-6xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">🍕</button>
+                        <button onclick="rate(5)" class="pizza-rating text-5xl md:text-6xl grayscale opacity-30 hover:scale-110 transition-transform filter drop-shadow-md">🍕</button>
+                    </div>
+                    <div id="rat-hub" class="hidden p-2 bg-black rounded font-bold text-xs text-center uppercase tracking-widest text-gray-400 w-max mx-auto border border-[var(--border-color)]">> RATED <span id="star-c" class="text-[var(--accent)] mx-2 font-black text-xl font-head"></span> SLICES.</div>
+                </div>
+
+                <button onclick="window.location.reload();" class="cafe-btn px-10 py-4 text-xl shadow-[0_0_20px_var(--accent-glow)]">
+                    Leave Central Perk
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="h-16 md:h-20 bg-[var(--panel-bg)] border-t border-[var(--border-color)] z-40 flex items-center justify-between px-4 md:px-8 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.5)] transition-colors duration-500">
+        <div class="hidden md:flex flex-1 items-center gap-2">
+            <span class="font-black text-2xl tracking-widest uppercase text-[var(--accent)] font-head">WOLFLIX</span>
+            <span class="text-xs uppercase tracking-widest border-l border-[var(--border-color)] pl-2 opacity-50 font-bold text-[var(--text-main)]">Masterclass</span>
+        </div>
+
+        <div class="flex items-center justify-center flex-1 gap-4 md:gap-6">
+            <button onclick="prevSlide()" class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center border-2 border-[var(--border-color)] rounded-full hover:bg-[var(--accent)] hover:text-[#1c140d] transition-colors text-[var(--text-main)] shadow-sm font-bold text-xl" title="Previous Phase">
+                &lt;
+            </button>
+            <div class="w-32 md:w-40 bg-black/40 h-2 md:h-3 rounded-full overflow-hidden border border-[var(--border-color)] shadow-inner">
+                <div id="lcd-prog" class="h-full bg-[var(--accent)] w-0 transition-all duration-300"></div>
+            </div>
+            <button onclick="nextSlide()" class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center border-2 border-[var(--border-color)] rounded-full hover:bg-[var(--accent)] hover:text-[#1c140d] transition-colors text-[var(--text-main)] shadow-sm font-bold text-xl" title="Next Phase">
+                &gt;
+            </button>
+        </div>
+
+        <div class="flex-1 text-right font-bold tracking-widest uppercase text-xs md:text-sm text-[var(--text-muted)]">
+            Page <span id="page-num" class="text-[var(--text-main)] ml-1 font-black">01</span> <span class="opacity-50 text-[10px]">/ 25</span>
+        </div>
+    </footer>
+
+    <!-- SLIDE-OUT NOTEPAD -->
+    <aside id="notepad-panel" class="fixed top-0 right-0 w-full max-w-md h-full bg-[var(--bg-main)] border-l-2 border-[var(--border-color)] z-[70] translate-x-full flex flex-col shadow-[-10px_0_30px_rgba(0,0,0,0.8)] transition-transform duration-300 text-[var(--text-main)]">
+        <div class="p-6 border-b border-[var(--border-color)] bg-[var(--panel-bg)] flex justify-between items-center shadow-sm">
+            <h2 class="font-black uppercase tracking-widest text-2xl flex items-center gap-2 font-head text-[var(--accent)]">
+                📝 Menu Notes
+            </h2>
+            <button onclick="closeNotepad()" class="text-gray-500 hover:text-white font-black text-2xl px-2 transition-colors">✕</button>
+        </div>
+        <textarea class="flex-1 w-full bg-transparent p-8 font-base font-medium text-lg leading-relaxed outline-none resize-none placeholder:text-gray-600" placeholder="Type your class notes here..."></textarea>
+    </aside>
+
+        <script>
+        // GLOBAL VARIABLES
+        var currentSlide = 0;
+        var totalSlides = 25;
+        var isHacked = false;
+
+        // PAGINATION & UI
+        function updateUI() {
+            var slides = document.querySelectorAll('.slide');
+            var pageNum = document.getElementById('page-num');
+            var prog = document.getElementById('lcd-prog');
+            var mainArea = document.getElementById('main-area');
+
+            if(pageNum) pageNum.innerText = (currentSlide + 1).toString().padStart(2, '0');
+            if(prog && totalSlides > 1) prog.style.width = ((currentSlide / (totalSlides - 1)) * 100) + '%';
+
+            for(var i = 0; i < slides.length; i++) {
+                if(i === currentSlide) {
+                    slides[i].classList.add('active');
+                } else {
+                    slides[i].classList.remove('active');
+                }
+            }
+
+            var iframes = document.querySelectorAll('iframe');
+            for(var j = 0; j < iframes.length; j++) {
+                var src = iframes[j].src;
+                iframes[j].src = src; 
+            }
+
+            if(mainArea) mainArea.scrollTop = 0;
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides - 1) { currentSlide++; updateUI(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; updateUI(); } }
+
+        document.addEventListener('keydown', function(e) {
+            if(e.key === 'ArrowRight') nextSlide();
+            if(e.key === 'ArrowLeft') prevSlide();
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen().catch(function(){});
+            } else { document.exitFullscreen().catch(function(){}); }
+        }
+
+        function toggleNotepad() {
+            var panel = document.getElementById('notepad-panel');
+            var overlay = document.getElementById('overlay-dark');
+            if(panel) panel.classList.toggle('translate-x-full');
+            if(overlay) overlay.classList.toggle('hidden');
+        }
+
+        function closeNotepad() {
+            var panel = document.getElementById('notepad-panel');
+            var overlay = document.getElementById('overlay-dark');
+            if(panel) panel.classList.add('translate-x-full');
+            if(overlay) overlay.classList.add('hidden');
+        }
+
+        function showDef(word, def, prompt) {
+            var elWord = document.getElementById('dict-word');
+            var elDef = document.getElementById('dict-def');
+            var elPrompt = document.getElementById('dict-prompt');
+            var modal = document.getElementById('dict-modal');
+            
+            if(elWord) elWord.innerText = word;
+            if(elDef) elDef.innerText = def;
+            if(elPrompt) elPrompt.innerText = prompt;
+            if(modal) modal.style.display = 'flex';
+        }
+
+        function closeDict() {
+            var modal = document.getElementById('dict-modal');
+            if(modal) modal.style.display = 'none';
+        }
+
+        function triggerPraise(text, icon) {
+            var popup = document.getElementById('praise-popup');
+            var textEl = document.getElementById('praise-text');
+            if(textEl) textEl.innerHTML = text + " <span class='ml-2'>" + icon + "</span>";
+            if(popup) {
+                popup.classList.add('show');
+                setTimeout(function() { popup.classList.remove('show'); }, 2000);
+            }
+        }
+
+        // WOW MECHANIC (FOOD ALERT)
+        function triggerFoodAlert() {
+            if(isHacked) { nextSlide(); return; }
+            var btn = document.getElementById('alert-btn');
+            if(btn) btn.disabled = true;
+
+            var overlay = document.getElementById('alert-overlay');
+            if(overlay) overlay.classList.add('alert-active');
+
+            setTimeout(function() {
+                document.body.classList.add('theme-joey');
+                var title = document.getElementById('header-title');
+                var icon = document.getElementById('header-icon');
+                if(title) title.innerText = "JOEY'S MIND";
+                if(icon) icon.innerText = "🚨";
+                isHacked = true;
+            }, 1000);
+
+            setTimeout(function() {
+                if(overlay) overlay.classList.remove('alert-active');
+                nextSlide();
+            }, 2500);
+        }
+
+        // INTERRUPTION SIMULATOR
+        function triggerInterruption() {
+            var box = document.getElementById('sim-box');
+            var fb = document.getElementById('sim-feedback');
+            if(box) box.classList.add('interrupted');
+            if(fb) fb.style.opacity = '1';
+        }
+
+        // --- CENTRAL PERK COFFEE MATCHING GAME ---
+        var cafeGame1 = {
+            currentIndex: 0,
+            tickets: [
+                { def: "A romantic meeting between two people.", answer: "A DATE", prompt: "What is the perfect place for a first date in your opinion?" },
+                { def: "To give a portion of what you have to others.", answer: "TO SHARE", prompt: "What is one thing you NEVER share with anyone?" },
+                { def: "The flat object you put your food on.", answer: "A PLATE", prompt: "Is it rude to eat from someone else's plate without asking?" }
+            ]
+        };
+
+        var cafeGame2 = {
+            currentIndex: 0,
+            tickets: [
+                { def: "Fried potatoes (Chips in the UK).", answer: "FRIES", prompt: "Do you prefer fries, onion rings, or salad as a side dish?" },
+                { def: "To stretch your arm to touch or grab something.", answer: "TO REACH", prompt: "If you can't reach the salt on the table, what should you say?" },
+                { def: "A strict rule. If you do this, the relationship is over.", answer: "DEALBREAKER", prompt: "What is a Dealbreaker for you in a friendship? (e.g. Lying, being late...)" }
+            ]
+        };
+
+        function checkCup(gameId, word, btnElement) {
+            var game = (gameId === 1) ? cafeGame1 : cafeGame2;
+            if (game.currentIndex >= game.tickets.length) return; // Already finished
+
+            var currentTicket = game.tickets[game.currentIndex];
+            var cupBody = btnElement.querySelector('.cup-body');
+            
+            if (word === currentTicket.answer) {
+                // Correct!
+                btnElement.classList.add('opacity-30', 'pointer-events-none', 'scale-90');
+                cupBody.classList.remove('border-[#8b5a2b]', 'bg-[#eaddcf]');
+                cupBody.classList.add('border-green-500', 'bg-green-900');
+                
+                // Show the Follow-up instantly for the current word
+                var followUpBox = document.getElementById('dynamic-followup-' + gameId);
+                var promptText = document.getElementById('dynamic-prompt-text-' + gameId);
+                
+                if (promptText) promptText.innerText = currentTicket.prompt;
+                if (followUpBox) {
+                    followUpBox.classList.remove('hidden');
+                    // Add a tiny animation to draw attention
+                    followUpBox.classList.add('opacity-0', 'translate-y-4');
+                    setTimeout(function() {
+                        followUpBox.classList.remove('opacity-0', 'translate-y-4');
+                    }, 50);
+                }
+                
+                game.currentIndex++;
+                
+                // Update the Ticket Box for the next word (or finish)
+                var ticketDef = document.getElementById('ticket-def-' + gameId);
+                var ticketBox = document.getElementById('ticket-box-' + gameId);
+                
+                if (ticketBox) ticketBox.classList.add('opacity-0', 'scale-95'); // Fade out old ticket
+                
+                setTimeout(function() {
+                    if (game.currentIndex < game.tickets.length) {
+                        if (ticketDef) ticketDef.innerText = game.tickets[game.currentIndex].def;
+                        triggerPraise('SERVED!', '☕');
+                    } else {
+                        if (ticketDef) ticketDef.innerText = "ALL ORDERS COMPLETE!";
+                        if (ticketBox) {
+                            ticketBox.classList.remove('border-[var(--accent)]');
+                            ticketBox.classList.add('border-green-500');
+                        }
+                        triggerPraise('PERFECT SERVICE!', '🌟');
+                    }
+                    if (ticketBox) ticketBox.classList.remove('opacity-0', 'scale-95'); // Fade in new ticket
+                }, 300);
+
+            } else {
+                // Wrong!
+                btnElement.classList.add('error-shake');
+                cupBody.classList.add('border-red-500');
+                setTimeout(function() {
+                    btnElement.classList.remove('error-shake');
+                    cupBody.classList.remove('border-red-500');
+                }, 400);
+            }
+        }
+
+        // ROULETTE LOGIC
+        var rouletteQuestions = [
+            "What were you doing at 8 PM yesterday?",
+            "Were you sleeping well last night?",
+            "What were you thinking about before this class?",
+            "What was your best friend doing an hour ago?",
+            "Were you watching TV this morning?",
+            "What were you eating for dinner yesterday?"
+        ];
+        var isSpinning = false;
+
+        function spinRoulette() {
+            if (isSpinning || rouletteQuestions.length === 0) return;
+            isSpinning = true;
+            
+            var box = document.getElementById('roulette-text');
+            var countEl = document.getElementById('roulette-count');
+            var shuffles = 10;
+            var interval = setInterval(function() {
+                var randomIdx = Math.floor(Math.random() * rouletteQuestions.length);
+                box.innerText = rouletteQuestions[randomIdx];
+                box.style.color = '#fff';
+                box.classList.remove('italic', 'text-[var(--accent)]');
+                shuffles--;
+                
+                if (shuffles <= 0) {
+                    clearInterval(interval);
+                    var finalIdx = Math.floor(Math.random() * rouletteQuestions.length);
+                    var selectedQ = rouletteQuestions[finalIdx];
+                    box.innerText = selectedQ;
+                    box.classList.add('text-[var(--accent)]');
+                    
+                    // Remove from array
+                    rouletteQuestions.splice(finalIdx, 1);
+                    if(countEl) countEl.innerText = rouletteQuestions.length;
+                    
+                    if(rouletteQuestions.length === 0) {
+                        setTimeout(function(){ box.innerText = "All questions answered!"; }, 3000);
+                    }
+                    isSpinning = false;
+                }
+            }, 100);
+        }
+
+        // RATING SYSTEM
+        function rate(n) {
+            var drops = document.querySelectorAll('.pizza-rating');
+            for(var i=0; i<drops.length; i++) {
+                if(i < n) {
+                    drops[i].classList.remove('grayscale', 'opacity-30');
+                    drops[i].style.filter = "drop-shadow(0 0 10px var(--accent-glow))";
+                } else {
+                    drops[i].classList.add('grayscale', 'opacity-30');
+                    drops[i].style.filter = "none";
+                }
+            }
+            var hub = document.getElementById('rat-hub');
+            var star = document.getElementById('star-c');
+            if(hub) hub.classList.remove('hidden');
+            if(star) star.innerText = n;
+        }
+
+        // INITIALIZE
+        updateUI();
+
+    </script>
+</body>
+</html>
